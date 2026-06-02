@@ -25,4 +25,3 @@ def test_pokemon_not_found():
     response = client.get("/pokemons/9999999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Pokémon não encontrado"
-    
