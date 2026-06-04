@@ -58,11 +58,21 @@ Nesses links, você pode testar os endpoints da API e ver exemplos de respostas.
 - GET `/pokemons`: retorna lista paginada de pokémons. Use parâmetros `limit` e `offset`.
   - Exemplo: `/pokemons?limit=10&offset=0`
 - GET `/pokemons/{id}`: retorna informações detalhadas de um pokémon.
+**Atenção:**
+- Endpoints `/pokemons` e `/pokemons/{id}` consultam diretamente a PokéAPI externa.
+- Endpoints `/pokemons/local` e `/pokemons/local/{id_ou_nome}` são para cadastrar, buscar, atualizar e deletar pokémons locais (CRUD no banco).
 
 _Páginação:_ Utilize os parâmetros `limit` e `offset` para navegar entre páginas.
 
 ## Funcionalidades extras implementadas
 - (Exemplo: Cache com Redis, tratamento de exceções personalizado, etc.)
+
+## O .env
+O arquivo .env foi criado, mas por motivos técnicos e de segurança não é enviado para o repositório (está no .gitignore). 
+No lugar disso, disponibilizo o arquivo .env.example, que inclui como exemplo:
+DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+
+Basta copiar o .env.example para .env e, se necessário, ajustar os valores para o seu ambiente.
 
 ## Executando os testes
 
@@ -71,6 +81,18 @@ Após instalar as dependências ou subir o ambiente no container, rode:
 ```sh
 pytest
 
+### Criar um Pokémon local
+POST /pokemons/local
+
+Payload:
+```json
+{
+  "name": "pikachuteste",
+  "height": 4,
+  "weight": 60,
+  "type": "electric",
+  "sprites": "https://caminho-do-sprite.png"
+}
 
 ### Detalhe de um pokémon
 GET /pokemons/1
@@ -82,9 +104,32 @@ Exemplo de resposta:
   "id": 1,
   "height": 7,
   "weight": 69,
-  "types": ["grass", "poison"],
-  "sprites": {
+  "types":["grass", "poison"],
+  "sprites": 
+  {
     "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
-    "...": "..."
-  }
+    "...": "..."  
+    }
+}
+
+###Atualizar um Pokémon local
+
+PUT /pokemons/local/pikachuteste Payload:
+
+{
+  "name": "pikachuteste",
+  "height": 5,
+  "weight": 65,
+  "type": "electric",
+  "sprites": "https://caminho-do-novo-sprite.png"
+}
+
+###Deletar um Pokémon local
+
+DELETE /pokemons/local/pikachuteste
+
+Exemplo de resposta de erro (quando não encontrado)
+
+{
+  "detail": "Pokémon não encontrado."
 }

@@ -1,47 +1,69 @@
 import httpx
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from models import Base, Pokemon
+from database import engine, SessionLocal
 
 app = FastAPI()
 
+Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 POKEAPI_URL = "https://pokeapi.co/api/v2/pokemon"
 
-@app.get("/pokemons")
-async def list_pokemons(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0)
-):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f"{POKEAPI_URL}?limit={limit}&offset={offset}")
-        if response.status_code != 200:
-            raise HTTPException(status_code=502, detail="Erro ao acessar a PokéAPI")
-        data = response.json()
-    
-    pagination = {
-        "total": data["count"],
-        "limit": limit,
-        "offset": offset,
-        "next": f"/pokemons?limit={limit}&offset={offset+limit}" if data["next"] else None,
-        "previous": f"/pokemons?limit={limit}&offset={offset-limit}" if data["previous"] and offset-limit >= 0 else None
-    }
-    return {
-        "data": data["results"],
-        "pagination": pagination
-    }
+@app.post("/pokemons", response_model=dict)
+def create_pokemon(pokemon: dict, db: Session = Depends(get_db)):
+    if db.query(Pokemon).filter(Pokemon.name == pokemon["name"]).first():
+        raise HTTPException(status_code=400, detail="Pokemon com esse nome já existe.")
+    db_pokemon = Pokemon(**pokemon)
+    db.add(db_pokemon)
+    db.commit()
+    db.refresh(db_pokemon)
+    return db_pokemon.__dict__
 
-@app.get("/pokemons/{pokemon_id}")
-async def get_pokemon(pokemon_id: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f"{POKEAPI_URL}/{pokemon_id}")
-        if response.status_code == 404:
-            raise HTTPException(status_code=404, detail="Pokémon não encontrado")
-        elif response.status_code != 200:
-            raise HTTPException(status_code=502, detail="Erro ao acessar a PokéAPI")
-        data = response.json()
-        return {
-            "name": data["name"],
-            "id": data["id"],
-            "height": data["height"],
-            "weight": data["weight"],
-            "types": [t["type"]["name"] for t in data["types"]],
-            "sprites": data["sprites"],
-        }
+@app.get("/pokemons/local/{id_or_name}", response_model=dict)
+def get_local_pokemon(id_or_name: str, db: Session = Depends(get_db)):
+    query = None
+    if id_or_name.isdigit():
+        query = db.query(Pokemon).filter(Pokemon.id == int(id_or_name)).first()
+    else:
+        query = db.query(Pokemon).filter(Pokemon.name == id_or_name).first()
+    if not query:
+        raise HTTPException(status_code=404, detail="Pokémon não encontrado.")
+    return query.__dict__
+
+@app.put("/pokemons/local/{id_or_name}", response_model=dict)
+def update_pokemon(id_or_name: str, updated: dict, db: Session = Depends(get_db)):
+    if id_or_name.isdigit():
+        pokemon = db.query(Pokemon).filter(Pokemon.id == int(id_or_name)).first()
+    else:
+        pokemon = db.query(Pokemon).filter(Pokemon.name == id_or_name).first()
+    if not pokemon:
+        raise HTTPException(status_code=404, detail="Pokémon não encontrado.")
+
+    for key, value in updated.items():
+        if hasattr(pokemon, key):
+            setattr(pokemon, key, value)
+
+    db.commit()
+    db.refresh(pokemon)
+    return pokemon.__dict__
+
+@app.delete("/pokemons/local/{id_or_name}", response_model=dict)
+def delete_pokemon(id_or_name: str, db: Session = Depends(get_db)):
+    if id_or_name.isdigit():
+        pokemon = db.query(Pokemon).filter(Pokemon.id == int(id_or_name)).first()
+    else:
+        pokemon = db.query(Pokemon).filter(Pokemon.name == id_or_name).first()
+    if not pokemon:
+        raise HTTPException(status_code=404, detail="Pokémon não encontrado.")
+
+    db.delete(pokemon)
+    db.commit()
+    return {"detail": "Pokémon deletado com sucesso."}
