@@ -59,12 +59,15 @@ def test_get_local_pokemon():
         "sprites": "url2"
     }
     resp_create = client.post("/pokemons/local", json=payload)
-    poke_id = resp_create.json()["id"]
-    
+    assert resp_create.status_code in [200, 201]
+    data_create = resp_create.json()
+    assert "id" in data_create
+    poke_id = data_create["id"]
+
     resp = client.get(f"/pokemons/local/{poke_id}")
     assert resp.status_code == 200
     assert resp.json()["name"] == "testget"
-    
+
     resp2 = client.get("/pokemons/local/testget")
     assert resp2.status_code == 200
     assert resp2.json()["id"] == poke_id
@@ -72,7 +75,10 @@ def test_get_local_pokemon():
 def test_update_local_pokemon():
     payload = { "name": "testupdate", "height": 6, "weight": 66, "type": "fairy", "sprites": "url3" }
     resp_create = client.post("/pokemons/local", json=payload)
-    poke_id = resp_create.json()["id"]
+    assert resp_create.status_code in [200, 201]
+    data_create = resp_create.json()
+    assert "id" in data_create
+    poke_id = data_create["id"]
 
     payload_update = { "name": "testupdate", "height": 12, "weight": 77, "type": "fairy", "sprites": "url4" }
     resp = client.put(f"/pokemons/local/{poke_id}", json=payload_update)
@@ -84,7 +90,10 @@ def test_update_local_pokemon():
 def test_delete_local_pokemon():
     payload = { "name": "testdelete", "height": 3, "weight": 30, "type": "ghost", "sprites": "url5" }
     resp_create = client.post("/pokemons/local", json=payload)
-    poke_id = resp_create.json()["id"]
+    assert resp_create.status_code in [200, 201]
+    data_create = resp_create.json()
+    assert "id" in data_create
+    poke_id = data_create["id"]
 
     resp = client.delete(f"/pokemons/local/{poke_id}")
     assert resp.status_code == 200
