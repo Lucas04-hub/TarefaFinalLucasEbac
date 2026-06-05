@@ -53,7 +53,7 @@ def get_pokemons(limit: int = Query(20), offset: int = Query(0)):
 
 @app.get("/pokemons/{poke_id}")
 def get_pokemon(poke_id: int):
-    
+
     url = f"https://pokeapi.co/api/v2/pokemon/{poke_id}"
     r = httpx.get(url)
     if r.status_code != 200:
