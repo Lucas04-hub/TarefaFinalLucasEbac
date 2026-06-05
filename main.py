@@ -28,7 +28,7 @@ def get_pokemons(limit: int = Query(20), offset: int = Query(0)):
         return {"detail": "Erro ao consultar PokéAPI."}, 503
     data = r.json()
     return {
-        "results": data["results"],
+        "data": data["results"],
         "count": data["count"],
         "limit": limit,
         "offset": offset,
