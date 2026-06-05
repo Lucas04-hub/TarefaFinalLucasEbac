@@ -37,11 +37,11 @@ def get_pokemons(limit: int = Query(20), offset: int = Query(0)):
 
 @app.get("/pokemons/{poke_id}")
 def get_pokemon(poke_id: int):
-    """Retorna detalhes de um pokémon pelo id, consultando a PokéAPI."""
+    
     url = f"https://pokeapi.co/api/v2/pokemon/{poke_id}"
     r = httpx.get(url)
     if r.status_code != 200:
-        return {"detail": "Pokémon não encontrado"}, 404
+        raise HTTPException(status_code=404, detail="Pokémon não encontrado")
     p = r.json()
     return {
         "id": p["id"],
@@ -51,6 +51,7 @@ def get_pokemon(poke_id: int):
         "types": [t["type"]["name"] for t in p["types"]],
         "sprites": p["sprites"]
     }
+
 
 @app.post("/pokemons", response_model=dict)
 def create_pokemon(pokemon: dict, db: Session = Depends(get_db)):
