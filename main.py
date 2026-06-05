@@ -68,6 +68,15 @@ def get_pokemon(poke_id: int):
         "sprites": p["sprites"]
     }
 
+@app.post("/pokemons/local", response_model=dict)
+def create_local_pokemon(pokemon: dict, db: Session = Depends(get_db)):
+    if db.query(Pokemon).filter(Pokemon.name == pokemon["name"]).first():
+        raise HTTPException(status_code=400, detail="Pokemon com esse nome já existe.")
+    db_pokemon = Pokemon(**pokemon)
+    db.add(db_pokemon)
+    db.commit()
+    db.refresh(db_pokemon)
+    return db_pokemon.__dict__
 
 @app.post("/pokemons", response_model=dict)
 def create_pokemon(pokemon: dict, db: Session = Depends(get_db)):
