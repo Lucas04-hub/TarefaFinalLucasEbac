@@ -25,13 +25,29 @@ def get_pokemons(limit: int = Query(20), offset: int = Query(0)):
     if r.status_code != 200:
         return {"detail": "Erro ao consultar PokéAPI."}, 503
     data = r.json()
+
+    pokemons = []
+    for item in data["results"]:
+        poke_r = httpx.get(item["url"])
+        if poke_r.status_code != 200:
+            continue
+        p = poke_r.json()
+        pokemons.append({
+            "id": p["id"],
+            "name": p["name"],
+            "height": p["height"],
+            "weight": p["weight"],
+            "types": [t["type"]["name"] for t in p["types"]],
+            "sprites": p["sprites"]
+        })
+
     return {
-        "data": data["results"],
+        "data": pokemons,
         "pagination": {
             "count": data["count"],
             "limit": limit,
             "offset": offset,
-        }
+        },
     }
 
 
