@@ -1,5 +1,5 @@
 import httpx
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from models import Base, Pokemon
 from database import engine, SessionLocal
@@ -16,6 +16,40 @@ def get_db():
         db.close()
 
 POKEAPI_URL = "https://pokeapi.co/api/v2/pokemon"
+
+@app.get("/pokemons")
+def get_pokemons(limit: int = Query(20), offset: int = Query(0)):
+    """
+    Lista pokémons da PokéAPI de forma paginada.
+    """
+    url = f"https://pokeapi.co/api/v2/pokemon?limit={limit}&offset={offset}"
+    r = httpx.get(url)
+    if r.status_code != 200:
+        return {"detail": "Erro ao consultar PokéAPI."}, 503
+    data = r.json()
+    return {
+        "results": data["results"],
+        "count": data["count"],
+        "limit": limit,
+        "offset": offset,
+    }
+
+@app.get("/pokemons/{poke_id}")
+def get_pokemon(poke_id: int):
+    """Retorna detalhes de um pokémon pelo id, consultando a PokéAPI."""
+    url = f"https://pokeapi.co/api/v2/pokemon/{poke_id}"
+    r = httpx.get(url)
+    if r.status_code != 200:
+        return {"detail": "Pokémon não encontrado"}, 404
+    p = r.json()
+    return {
+        "id": p["id"],
+        "name": p["name"],
+        "height": p["height"],
+        "weight": p["weight"],
+        "types": [t["type"]["name"] for t in p["types"]],
+        "sprites": p["sprites"],
+    }
 
 @app.post("/pokemons", response_model=dict)
 def create_pokemon(pokemon: dict, db: Session = Depends(get_db)):
