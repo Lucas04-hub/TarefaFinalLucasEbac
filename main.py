@@ -37,7 +37,7 @@ def get_pokemons(limit: int = Query(20), offset: int = Query(0)):
             "name": p["name"],
             "height": p["height"],
             "weight": p["weight"],
-            "types": [t["type"]["name"] for t in p["types"]],
+            "type": [t["type"]["name"] for t in p["type"]],
             "sprites": p["sprites"]
             })
 
@@ -64,7 +64,7 @@ def get_pokemon(poke_id: int):
         "name": p["name"],
         "height": p["height"],
         "weight": p["weight"],
-        "types": [t["type"]["name"] for t in p["types"]],
+        "type": [t["type"]["name"] for t in p["type"]],
         "sprites": p["sprites"]
     }
 
@@ -81,7 +81,7 @@ def create_local_pokemon(pokemon: dict, db: Session = Depends(get_db)):
         "name": db_pokemon.name,
         "height": db_pokemon.height,
         "weight": db_pokemon.weight,
-        "types": db_pokemon.types,
+        "type": db_pokemon.types,
         "sprites": db_pokemon.sprites,
     }
 
@@ -98,7 +98,7 @@ def create_pokemon(pokemon: dict, db: Session = Depends(get_db)):
         "name": db_pokemon.name,
         "height": db_pokemon.height,
         "weight": db_pokemon.weight,
-        "types": db_pokemon.types,
+        "type": db_pokemon.types,
         "sprites": db_pokemon.sprites,
     }
 
@@ -116,7 +116,7 @@ def get_local_pokemon(id_or_name: str, db: Session = Depends(get_db)):
         "name": db_pokemon.name,
         "height": db_pokemon.height,
         "weight": db_pokemon.weight,
-        "types": db_pokemon.types,
+        "type": db_pokemon.types,
         "sprites": db_pokemon.sprites,
     }
 
@@ -140,7 +140,7 @@ def update_pokemon(id_or_name: str, updated: dict, db: Session = Depends(get_db)
         "name": db_pokemon.name,
         "height": db_pokemon.height,
         "weight": db_pokemon.weight,
-        "types": db_pokemon.types,
+        "type": db_pokemon.types,
         "sprites": db_pokemon.sprites,
     }
 
