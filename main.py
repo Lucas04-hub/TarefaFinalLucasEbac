@@ -39,7 +39,7 @@ def get_pokemons(limit: int = Query(20), offset: int = Query(0)):
             "weight": p["weight"],
             "types": [t["type"]["name"] for t in p["types"]],
             "sprites": p["sprites"]
-        })
+            })
 
     return {
         "data": pokemons,
