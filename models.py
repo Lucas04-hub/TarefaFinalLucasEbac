@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, JSON
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -9,5 +9,5 @@ class Pokemon(Base):
     name = Column(String, unique=True, index=True)
     height = Column(Integer)
     weight = Column(Integer)
-    type = Column(String)
+    type = Column(JSON)
     sprites = Column(String)
