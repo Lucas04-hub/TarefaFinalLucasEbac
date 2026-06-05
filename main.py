@@ -76,7 +76,14 @@ def create_local_pokemon(pokemon: dict, db: Session = Depends(get_db)):
     db.add(db_pokemon)
     db.commit()
     db.refresh(db_pokemon)
-    return db_pokemon.__dict__
+    return {
+        "id": db_pokemon.id,
+        "name": db_pokemon.name,
+        "height": db_pokemon.height,
+        "weight": db_pokemon.weight,
+        "types": db_pokemon.types,
+        "sprites": db_pokemon.sprites,
+    }
 
 @app.post("/pokemons", response_model=dict)
 def create_pokemon(pokemon: dict, db: Session = Depends(get_db)):
@@ -86,7 +93,14 @@ def create_pokemon(pokemon: dict, db: Session = Depends(get_db)):
     db.add(db_pokemon)
     db.commit()
     db.refresh(db_pokemon)
-    return db_pokemon.__dict__
+    return {
+        "id": db_pokemon.id,
+        "name": db_pokemon.name,
+        "height": db_pokemon.height,
+        "weight": db_pokemon.weight,
+        "types": db_pokemon.types,
+        "sprites": db_pokemon.sprites,
+    }
 
 @app.get("/pokemons/local/{id_or_name}", response_model=dict)
 def get_local_pokemon(id_or_name: str, db: Session = Depends(get_db)):
@@ -97,7 +111,14 @@ def get_local_pokemon(id_or_name: str, db: Session = Depends(get_db)):
         query = db.query(Pokemon).filter(Pokemon.name == id_or_name).first()
     if not query:
         raise HTTPException(status_code=404, detail="Pokémon não encontrado.")
-    return query.__dict__
+    return {
+        "id": db_pokemon.id,
+        "name": db_pokemon.name,
+        "height": db_pokemon.height,
+        "weight": db_pokemon.weight,
+        "types": db_pokemon.types,
+        "sprites": db_pokemon.sprites,
+    }
 
 @app.put("/pokemons/local/{id_or_name}", response_model=dict)
 def update_pokemon(id_or_name: str, updated: dict, db: Session = Depends(get_db)):
@@ -114,7 +135,14 @@ def update_pokemon(id_or_name: str, updated: dict, db: Session = Depends(get_db)
 
     db.commit()
     db.refresh(pokemon)
-    return pokemon.__dict__
+    return {
+        "id": db_pokemon.id,
+        "name": db_pokemon.name,
+        "height": db_pokemon.height,
+        "weight": db_pokemon.weight,
+        "types": db_pokemon.types,
+        "sprites": db_pokemon.sprites,
+    }
 
 @app.delete("/pokemons/local/{id_or_name}", response_model=dict)
 def delete_pokemon(id_or_name: str, db: Session = Depends(get_db)):
