@@ -41,21 +41,21 @@ def test_create_local_pokemon():
         "name": "testcreate",
         "height": 10,
         "weight": 100,
-        "type": "dark",
+        "types": ["dark"],
         "sprites": "url"
     }
     response = client.post("/pokemons/local", json=payload)
     assert response.status_code in [200, 201]
     data = response.json()
     assert data["name"] == "testcreate"
-    assert data["type"] == "dark"
+    assert data["types"] == ["dark"]
 
 def test_get_local_pokemon():
     payload = {
         "name": "testget",
         "height": 8,
         "weight": 80,
-        "type": "water",
+        "types": ["water"],
         "sprites": "url2"
     }
     resp_create = client.post("/pokemons/local", json=payload)
@@ -73,14 +73,14 @@ def test_get_local_pokemon():
     assert resp2.json()["id"] == poke_id
 
 def test_update_local_pokemon():
-    payload = { "name": "testupdate", "height": 6, "weight": 66, "type": "fairy", "sprites": "url3" }
+    payload = { "name": "testupdate", "height": 6, "weight": 66, "types": ["fairy"], "sprites": "url3" }
     resp_create = client.post("/pokemons/local", json=payload)
     assert resp_create.status_code in [200, 201]
     data_create = resp_create.json()
     assert "id" in data_create
     poke_id = data_create["id"]
 
-    payload_update = { "name": "testupdate", "height": 12, "weight": 77, "type": "fairy", "sprites": "url4" }
+    payload_update = { "name": "testupdate", "height": 12, "weight": 77, "types": ["fairy"], "sprites": "url4" }
     resp = client.put(f"/pokemons/local/{poke_id}", json=payload_update)
     assert resp.status_code == 200
     data = resp.json()
@@ -88,7 +88,7 @@ def test_update_local_pokemon():
     assert data["weight"] == 77
 
 def test_delete_local_pokemon():
-    payload = { "name": "testdelete", "height": 3, "weight": 30, "type": "ghost", "sprites": "url5" }
+    payload = { "name": "testdelete", "height": 3, "weight": 30, "types": ["ghost"], "sprites": "url5" }
     resp_create = client.post("/pokemons/local", json=payload)
     assert resp_create.status_code in [200, 201]
     data_create = resp_create.json()
@@ -107,7 +107,7 @@ def test_update_local_pokemon_not_found():
         "name": "naoencontra",
         "height": 1,
         "weight": 1,
-        "type": "ghost",
+        "types": ["ghost"],
         "sprites": "url"
     }
     resp = client.put("/pokemons/local/999999", json=payload_update)
